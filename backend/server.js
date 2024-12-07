@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import { connectDB } from './config/Db.js';
 
 import authRoute from './Router/auth.router.js';
+import taskRoute from './Router/task.router.js';
 
 dotenv.config();
 const app = express();
@@ -14,6 +15,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/', authRoute);
+app.use('/api/tasks', taskRoute);
 
 app.listen(PORT, () => {
     console.log(`server ready http://localhost:${PORT}`);

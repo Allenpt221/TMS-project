@@ -8,11 +8,11 @@ export const signUp = async (req, res) => {
     const hashpassword = bcrypt.hashSync(password, 10);
     try{
         if(!username || !email){
-            res.status(400).json({success: false, message: 'username and email required'});
+            return res.status(400).json({success: false, message: 'username and email required'});
         }
         const existUser = await authUser.findOne({$or: [{email}, {username}]});
         if(existUser){
-            res.status(406).json({success: false, message: 'Already Exist'});
+           return res.status(406).json({success: false, message: 'Already Exist'});
         }
 
         const newUser = new authUser({username, email, password: hashpassword});
@@ -30,21 +30,24 @@ export const login = async (req, res) => {
         const user = await authUser.findOne({email});
 
         if(!user){
-            res.status(400).json({success: false, message: 'Wrong credentials'});
+            return res.status(400).json({success: false, message: 'Wrong credentials'});
         }
 
         const correctPassword = await bcrypt.compare(password, user.password);
         if(!correctPassword){
-            res.status(400).json({success: false, message: 'Invalid Password'});
+            return res.status(400).json({success: false, message: 'Invalid Password'});
         }
 
     const token = jwt.sign({id: user._id}, process.env.JWT_SECRET, {expiresIn: '1h'});
     const currentTimeUTC = new Date();
     const expiryDateGMT8 = new Date(currentTimeUTC.getTime() + (8 * 60 * 60 * 1000));
     expiryDateGMT8.setHours(expiryDateGMT8.getHours() + 1);
-    res.cookie('acess-token', token, {httpOnly: true, expires: expiryDateGMT8});
+    res.cookie('acess-token', token, {
+        httpOnly: true, 
+        expires: expiryDateGMT8,
+        secure: process.env.NODE_ENV === 'production'});
 
-    res.status(200).json({success: true, message: 'Successfully LogIn'});
+    return res.status(200).json({success: true, message: 'Successfully LogIn'});
 
     } catch (error) {
         console.log('Server Error', error.message);
