@@ -64,8 +64,8 @@ export const updatetask = async (req, res) =>{
             const formattedDate = new Date(`20${year}-${month}-${day}`);
             dueDate = formattedDate;
         }
-        await TaskManagement.findByIdAndUpdate(id, {title, description, dueDate, createBy}, {new: true});
-        return res.status(200).json({success: true, message: 'Update successfully'});
+        const updatedTask = await TaskManagement.findByIdAndUpdate(id, {title, description, dueDate, createBy}, {new: true});
+        return res.status(200).json({success: true, data: updatedTask});
     } catch(error){
         console.error("Server Error", error.message);
         return res.status(200).json({success: false, message: 'Error is server'});
