@@ -26,7 +26,6 @@ export const createTask = async (req, res) =>{
         res.status(200).json({success: true, message: 'Task successfully create'});
     } catch(error){
         console.error('error server:' , error.message);
-
         res.status(500).json({success: false, message: 'Server is Error'});
     }
 };
@@ -42,7 +41,7 @@ export const deletetask = async (req, res) =>{
         return res.status(200).json({success: true, message: 'Task successfully Delete'});
     } catch (error){
         console.error("Server Error", error.message);
-        return res.status(200).json({success: false, message: 'Error is server'});
+        return res.status(500).json({success: false, message: 'Error is server'});
     }
 };
 
@@ -59,16 +58,19 @@ export const updatetask = async (req, res) =>{
             return res.status(404).json({ success: false, message: 'Task not found' });
         }
 
-        if (dueDate) {
-            const [month, day, year] = dueDate.split('/');
-            const formattedDate = new Date(`20${year}-${month}-${day}`);
-            dueDate = formattedDate;
+        const datePattern = /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/(\d{2})$/;
+        if (!dueDate || !datePattern.test(dueDate)) {
+            return res.status(400).json({ success: false, message: 'Invalid date format. Please use MM/DD/YY.' });
         }
-        const updatedTask = await TaskManagement.findByIdAndUpdate(id, {title, description, dueDate, createBy}, {new: true});
+
+        const [month, day, year] = dueDate.split('/');
+        const formattedDate = new Date(`20${year}-${month}-${day}`);
+
+        const updatedTask = await TaskManagement.findByIdAndUpdate(id, {title, description, dueDate: formattedDate, createBy}, {new: true});
         return res.status(200).json({success: true, data: updatedTask});
     } catch(error){
         console.error("Server Error", error.message);
-        return res.status(200).json({success: false, message: 'Error is server'});
+        return res.status(500).json({success: false, message: 'Error is server'});
     }
 };
 
@@ -82,7 +84,7 @@ export const showtask = async (req, res) => {
         return res.status(200).json({success: true, data: task});
     } catch (error){
         console.error("Server Error", error.message);
-        return res.status(200).json({success: false, message: 'Error is server'});
+        return res.status(500).json({success: false, message: 'Error is server'});
     }
 };
 
@@ -98,7 +100,7 @@ export const showtaskById = async (req, res) =>{
         return res.status(200).json({success: true, data: showtaskId});
     } catch (error){
         console.error("Server Error", error.message);
-        return res.status(200).json({success: false, message: 'Error is server'});
+        return res.status(500).json({success: false, message: 'Error is server'});
     }
 };
 
